@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#2a1810" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="煎饺合成" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="description" content="把一样的煎饺碰在一起，合成更大的饺中之王。一款适合手机的合成小游戏。" />
+  <link rel="icon" type="image/png" href="assets/icon.png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <title>煎饺合成</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="rotate" aria-hidden="true">请把手机竖过来再煎一锅哦</div>
+    <div id="stage">
+      <canvas id="scene" width="360" height="640" aria-hidden="true"></canvas>
+
+      <div id="hud" hidden>
+        <div class="hud-col">
+          <div class="hud-label">分数</div>
+          <div id="score">0</div>
+        </div>
+        <div class="hud-col hud-center">
+          <div class="hud-title">煎饺合成</div>
+          <div id="combo"></div>
+        </div>
+        <div class="hud-col hud-right">
+          <div class="hud-label">最高</div>
+          <div id="high">0</div>
+        </div>
+        <div id="next-wrap" title="下一个">
+          <span>下一个</span>
+          <canvas id="next" width="72" height="72"></canvas>
+        </div>
+      </div>
+
+      <button id="mute" type="button" aria-label="关闭声音" aria-pressed="false">♪</button>
+      <div id="hint" hidden>左右移动，松手放下</div>
+
+      <section id="screen-boot" class="screen">
+        <p class="loading">装盘中…</p>
+      </section>
+
+      <section id="screen-title" class="screen" hidden>
+        <div class="shade"></div>
+        <div class="card">
+          <img id="title-hero" class="hero" src="assets/hero.png" alt="" width="128" height="128" />
+          <h1>煎饺合成</h1>
+          <p class="tagline">一样的饺子碰上，就会合成更大的</p>
+          <p class="best">最高分 <strong id="title-high">0</strong></p>
+          <ol id="dex" class="dex" aria-label="合成图鉴"></ol>
+          <ul class="rules">
+            <li>左右滑动瞄准，松手放下饺子</li>
+            <li>两个相同的碰到一起就会合成</li>
+            <li>堆过红线就煎糊啦</li>
+          </ul>
+          <button type="button" id="btn-start" class="btn primary">开始煎饺</button>
+        </div>
+      </section>
+
+      <section id="screen-over" class="screen" hidden>
+        <div class="shade"></div>
+        <div class="card">
+          <img id="over-art" class="hero" src="assets/sad.png" alt="" width="128" height="128" />
+          <h2 id="over-title">锅满了！</h2>
+          <p id="over-badge" class="badge" hidden>新纪录</p>
+          <p class="over-score">本次 <strong id="over-score">0</strong> 分</p>
+          <p class="over-meta" id="over-meta"></p>
+          <div class="btn-row">
+            <button type="button" id="btn-retry" class="btn primary">再来一锅</button>
+            <button type="button" id="btn-share" class="btn ghost">分享战绩</button>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>作者 hukx</span>
+        <span class="sep">·</span>
+        <a href="https://afdian.com/a/hukxai" target="_blank" rel="noopener noreferrer">请作者喝奶茶</a>
+      </footer>
+
+      <div id="toast" hidden></div>
+    </div>
+  </div>
+  <script src="js/game.js"></script>
+</body>
+</html>
