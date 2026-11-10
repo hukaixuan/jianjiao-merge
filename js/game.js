@@ -364,17 +364,6 @@
     }
   }
 
-  function runSync(world, seconds) {
-    var frames = Math.max(1, Math.round(seconds * 60));
-    var f;
-    for (f = 0; f < frames; f++) {
-      var pairs = stepPhysics(world, 1 / 60);
-      applyMerges(world, pairs);
-      afterDropTick(world, 1 / 60);
-      updateFx(world, 1 / 60);
-    }
-  }
-
   function checkDanger(world, dt) {
 
     var danger = false;
@@ -948,136 +937,10 @@
     })).then(function () {
       showScreen("screen-title");
       requestAnimationFrame(tick);
-      if (/[?&]autotest=1\b/.test(location.search)) {
-        setTimeout(runBrowserAutotest, 80);
-      } else if (/[?&]demo=1\b/.test(location.search)) {
-        setTimeout(runDemoBoard, 80);
-      } else if (/[?&]over=1\b/.test(location.search)) {
-        setTimeout(function () {
-          startGame();
-          world.score = 1280;
-          world.maxType = 10;
-          world.maxCombo = 4;
-          endGame();
-        }, 80);
-      }
     }).catch(function (err) {
       $("screen-boot").innerHTML = "<p class='loading'>图片加载失败</p>";
       console.error(err);
     });
-  }
-
-  /* ---------- headless / autotest helpers ---------- */
-  function runHeadlessMergeTest() {
-    var w = createWorld();
-    w.state = "playing";
-    var a = makeBall(0, 160, 520);
-    var b = makeBall(0, 190, 520);
-    a.vx = 20;
-    b.vx = -20;
-    w.balls.push(a, b);
-    var merges = 0;
-    var frames = 0;
-    var exploded = false;
-    for (frames = 0; frames < 240; frames++) {
-      var pairs = stepPhysics(w, 1 / 60);
-      merges += applyMerges(w, pairs);
-      var k;
-      for (k = 0; k < w.balls.length; k++) {
-        var ball = w.balls[k];
-        if (!isFinite(ball.x) || !isFinite(ball.y) || Math.abs(ball.vx) > 4000) exploded = true;
-      }
-    }
-    var types = w.balls.map(function (ball) { return ball.type; });
-    return {
-      merges: merges,
-      score: w.score,
-      types: types,
-      count: w.balls.length,
-      hasTier1: types.indexOf(1) !== -1,
-      exploded: exploded,
-      allFinite: !exploded
-    };
-  }
-
-  function runChainTest() {
-    var w = createWorld();
-    w.state = "playing";
-    w.balls.push(makeBall(0, 180, 560));
-    w.balls.push(makeBall(0, 180, 520));
-    w.balls.push(makeBall(1, 180, 470));
-    var merges = 0;
-    var f;
-    for (f = 0; f < 300; f++) {
-      merges += applyMerges(w, stepPhysics(w, 1 / 60));
-    }
-    var maxT = 0;
-    w.balls.forEach(function (b) { if (b.type > maxT) maxT = b.type; });
-    return { merges: merges, maxType: maxT, score: w.score, count: w.balls.length };
-  }
-
-  function publishTest(result) {
-    root.__TEST_RESULT__ = result;
-    try {
-      document.title = result.ok ? "AUTOTEST:OK" : "AUTOTEST:FAIL";
-      var node = document.getElementById("autotest-out") || document.createElement("pre");
-      node.id = "autotest-out";
-      node.textContent = JSON.stringify(result);
-      if (!node.parentNode) document.body.appendChild(node);
-    } catch (e) {}
-    console.log("[autotest]", JSON.stringify(result));
-  }
-
-  function runBrowserAutotest() {
-    var result = { ok: false, merges: 0, errors: [] };
-    try {
-      var physics = runHeadlessMergeTest();
-      var chain = runChainTest();
-      result.physics = physics;
-      result.chain = chain;
-      startGame();
-      dropBall(world, 0, 178);
-      runSync(world, 0.95);
-      dropBall(world, 0, 186);
-      runSync(world, 1.1);
-      result.score = world.score;
-      result.merges = 0;
-      world.balls.forEach(function (b) { if (b.type >= 1) result.merges += 1; });
-      if (world.score > 0) result.merges = Math.max(result.merges, 1);
-      result.ballCount = world.balls.length;
-      result.types = world.balls.map(function (b) { return b.type; });
-      result.ok = !!(physics.hasTier1 && !physics.exploded && chain.maxType >= 2 && world.score > 0);
-      updateHud();
-      $("hint").hidden = true;
-      publishTest(result);
-    } catch (err) {
-      result.errors.push(String(err && err.stack || err));
-      publishTest(result);
-      console.error(err);
-    }
-  }
-
-  function runDemoBoard() {
-    startGame();
-    var drops = [
-      [0, 70], [0, 80], [1, 210], [0, 260], [2, 150],
-      [1, 200], [0, 100], [3, 290], [0, 170], [2, 155],
-      [1, 90], [0, 200], [0, 240], [4, 120]
-    ];
-    var i;
-    for (i = 0; i < drops.length; i++) {
-      dropBall(world, drops[i][0], drops[i][1]);
-      runSync(world, 0.85);
-    }
-    runSync(world, 1.2);
-    world.canDrop = true;
-    world.nextType = 0;
-    world.queuedType = 2;
-    world.aimX = 180;
-    updateHud();
-    $("hint").hidden = true;
-    try { document.title = "DEMO:READY " + world.score; } catch (e) {}
-    console.log("[demo] score=" + world.score + " balls=" + world.balls.length + " max=" + highestType(world));
   }
 
   var API = {
@@ -1087,8 +950,6 @@
     applyMerges: applyMerges,
     makeBall: makeBall,
     dropBall: dropBall,
-    runHeadlessMergeTest: runHeadlessMergeTest,
-    runChainTest: runChainTest,
     mount: boot
   };
 
